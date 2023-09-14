@@ -1,0 +1,33 @@
+name: "cargo-featalign action"
+description: "Use `cargo-featalign` to check your crate's features."
+branding:
+  color: "gray-dark"
+  icon: "check-circle"
+inputs:
+  crate:
+    description: "The path of the crate root, which will be passed to cargo-featalign directly."
+    required: true
+  features:
+    description: "The features that you want to check, which will be passed to cargo-featalign's `--features` directly."
+    required: true
+  default-std:
+    description: "If the default features is std or not."
+    required: false
+
+runs:
+  using: "composite"
+  steps:
+    - name: Setup cargo-featalign
+      run: |
+        curl -L https://github.com/hack-ink/cargo-featalign/releases/download/v0.6.1/cargo-featalign-x86_64-unknown-linux-gnu.zst | zstd -o cargo-featalign -d
+        chmod u+x cargo-featalign
+        mv cargo-featalign ~/.cargo/bin
+      shell: bash
+    - name: Check ${{ inputs.crate }} features
+      run: |
+        if [ "${{ inputs.default-std }}" = true ]; then
+          cargo featalign ${{ inputs.crate }} --features ${{ inputs.features }} --workspace-only --default-std --depth -1 --sort --mode dry-run
+        else
+          cargo featalign ${{ inputs.crate }} --features ${{ inputs.features }} --workspace-only --depth -1 --sort --mode dry-run
+        fi
+      shell: bash
