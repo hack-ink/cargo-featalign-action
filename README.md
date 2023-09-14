@@ -32,9 +32,9 @@ jobs:
       - name: Fetch latest code
         uses: actions/checkout@v4
       - name: Check
-        uses: actions/cargo-featalign-action@v0.1.0
+        uses: hack-ink/cargo-featalign-action@v0.1.0
         with:
-          path: polkadot/runtime/polkadot
+          crate: polkadot/runtime/polkadot
           features: std,runtime-benchmarks,try-runtime
           default-std: true
 ```
@@ -62,7 +62,7 @@ jobs:
       - name: Check ${{ matrix.target.chain }}
         uses: hack-ink/cargo-featalign-action@v0.1.0
         with:
-          path: polkadot
+          crate: polkadot
           features: std,runtime-benchmarks,try-runtime
           default-std: true
 ```
