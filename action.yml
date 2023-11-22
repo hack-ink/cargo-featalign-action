@@ -10,24 +10,31 @@ inputs:
   features:
     description: "The features that you want to check, which will be passed to cargo-featalign's `--features` directly."
     required: true
+  ignore:
+    description: "The specific crates that you want to ignore, which will be passed to cargo-featalign's `--ignore` directly."
+    required: false
+    default: "''"
   default-std:
     description: "If the default features is std or not."
     required: false
+    default: "false"
 
 runs:
   using: "composite"
   steps:
     - name: Setup cargo-featalign
       run: |
-        curl -L https://github.com/hack-ink/cargo-featalign/releases/download/v0.6.1/cargo-featalign-x86_64-unknown-linux-gnu.zst | zstd -o cargo-featalign -d
+        curl -L https://github.com/hack-ink/cargo-featalign/releases/download/v0.6.2/cargo-featalign-x86_64-unknown-linux-gnu.zst | zstd -o cargo-featalign -d
         chmod u+x cargo-featalign
         mv cargo-featalign ~/.cargo/bin
       shell: bash
     - name: Check ${{ inputs.crate }} features
       run: |
-        if [ "${{ inputs.default-std }}" = true ]; then
-          cargo featalign ${{ inputs.crate }} --features ${{ inputs.features }} --workspace-only --default-std --depth -1 --sort --mode dry-run
-        else
-          cargo featalign ${{ inputs.crate }} --features ${{ inputs.features }} --workspace-only --depth -1 --sort --mode dry-run
-        fi
+        cargo featalign ${{ inputs.crate }} \
+          --features ${{ inputs.features }} \
+          --mode check \
+          --workspace-only \
+          --ignore ${{ inputs.ignore }} \
+          ${{ inputs.default-std == 'true' && '--default-std' || '' }} \
+          --depth -1 | jq
       shell: bash
